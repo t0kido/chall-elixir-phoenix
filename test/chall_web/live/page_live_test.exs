@@ -1,9 +1,6 @@
 defmodule ChallWeb.PageLiveTest do
-  use ChallWeb.ConnCase, async: false
-
+  use ChallWeb.ConnCase
   import Phoenix.LiveViewTest
-  import Ecto.Query, only: [from: 2]
-
   alias Chall.{GasStation, Repo}
 
   @gas_station1 %{
@@ -17,14 +14,10 @@ defmodule ChallWeb.PageLiveTest do
   @gas_station2 %{
     recordid: "record2",
     prix_valeur: 1.90,
-    adresse: "add 1",
+    adresse: "add 2",
     name: "gas station 2",
     prix_nom: "SP95"
   }
-
-  setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
-  end
 
   setup [:create_gas_stations]
 
@@ -36,13 +29,23 @@ defmodule ChallWeb.PageLiveTest do
     assert render(view) =~ "Gas Price"
   end
 
-  defp create_gas_stations(_) do
-    gas_stations = [@gas_station1, @gas_station2]
+  test "verify data from database are rendered on the view", %{conn: conn} do
+    {:ok, view, _html} = live(conn, "/")
 
-    Repo.insert_all(
-      GasStation,
-      gas_stations
-    )
+    send(view.pid, :update)
+    rendered_view = render(view)
+
+    # verify all values are rendered 
+    assert rendered_view =~ @gas_station1.name
+    assert rendered_view =~ @gas_station2.name
+  end
+
+  defp create_gas_stations(_) do
+    assert {2, nil} =
+             Repo.insert_all(
+               GasStation,
+               [@gas_station1, @gas_station2]
+             )
 
     :ok
   end

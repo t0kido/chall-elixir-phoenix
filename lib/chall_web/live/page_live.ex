@@ -1,8 +1,7 @@
 defmodule ChallWeb.PageLive do
   import Ecto.Query, only: :macros
   use Phoenix.LiveView
-  alias Chall.Repo
-  alias Chall.GasStation
+  alias Chall.{Repo, GasStation}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -12,7 +11,6 @@ defmodule ChallWeb.PageLive do
 
   @impl true
   def handle_info(:update, socket) do
-    # Update the data and send the updated data to the LiveView
     Process.send_after(self(), :update, 10_000)
 
     {:noreply,
